@@ -613,7 +613,7 @@ static void goodix_ts_work_func(struct work_struct *work)
     char **envp;
 
     u8 doze_buf[3] = {0x81, 0x4B};
-    uint16_t gesture_key = KEY_UNKNOWN;
+    uint16_t gesture_key = 0;
 #endif
     GTP_DEBUG_FUNC();
 
@@ -720,7 +720,7 @@ static void goodix_ts_work_func(struct work_struct *work)
             }
         }
 
-        if (doze_status == DOZE_WAKEUP && gesture_key != KEY_UNKNOWN) {
+        if (doze_status == DOZE_WAKEUP && gesture_key > 0) {
              input_report_key(ts->input_dev, gesture_key, 1);
              input_report_key(ts->input_dev, gesture_key, 0);
              input_sync(ts->input_dev);
