@@ -144,6 +144,16 @@ config CPU_FREQ_DEFAULT_GOV_LIONFISH
 	help
 	  Use the CPUFreq governor 'lionfish' as default.
 
+config CPU_FREQ_DEFAULT_GOV_INTEL
+	bool "intel"
+	select CPU_FREQ_GOV_INTEL
+	help
+	  Use the CPUFreq governor 'intel' as default. This allows
+	  you to get a full dynamic cpu frequency capable system by simply
+	  loading your cpufreq low-level hardware driver, using the
+	  'intel' governor for better perfromance and power with Intel
+	  mobile platforms.
+
 endchoice
 
 config CPU_FREQ_GOV_PERFORMANCE
@@ -287,6 +297,9 @@ config CPU_FREQ_GOV_LIONFISH
 	  module will be called cpufreq_lionfish.
 
 	  If in doubt, say N.
+
+config CPU_FREQ_GOV_INTEL
+	tristate "'intel' cpufreq policy governor"
 
 config CPU_BOOST
 	tristate "Event base short term CPU freq boost"
