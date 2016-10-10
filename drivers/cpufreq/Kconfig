@@ -154,6 +154,12 @@ config CPU_FREQ_DEFAULT_GOV_INTEL
 	  'intel' governor for better perfromance and power with Intel
 	  mobile platforms.
 
+config CPU_FREQ_DEFAULT_GOV_SMARTMAX_EPS
+        bool "smartmax_eps"
+        select CPU_FREQ_GOV_SMARTMAX_EPS
+        help
+          Use the CPUFreq governor 'smartmax eps' as default
+
 endchoice
 
 config CPU_FREQ_GOV_PERFORMANCE
@@ -300,6 +306,12 @@ config CPU_FREQ_GOV_LIONFISH
 
 config CPU_FREQ_GOV_INTEL
 	tristate "'intel' cpufreq policy governor"
+
+config CPU_FREQ_GOV_SMARTMAX_EPS
+        tristate "'smartmax EPS' cpufreq policy governor"
+        select CPU_FREQ_TABLE
+        help
+          'smartmax EPS' is the extreme powersaving version of smartmax
 
 config CPU_BOOST
 	tristate "Event base short term CPU freq boost"
