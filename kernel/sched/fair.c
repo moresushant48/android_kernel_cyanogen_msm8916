@@ -1335,8 +1335,8 @@ unsigned int __read_mostly sysctl_sched_downmigrate_pct = 80;
  * Tasks whose nice value is > sysctl_sched_upmigrate_min_nice are never
  * considered as "big" tasks.
  */
-static int __read_mostly sched_upmigrate_min_nice = 5;
-int __read_mostly sysctl_sched_upmigrate_min_nice = 5;
+static int __read_mostly sched_upmigrate_min_nice = 9;
+int __read_mostly sysctl_sched_upmigrate_min_nice = 9;
 
 /*
  * Tunable to govern scheduler wakeup placement CPU selection
