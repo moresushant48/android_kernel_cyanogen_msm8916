@@ -445,6 +445,9 @@ static char const *pri_rx_sample_rate_text[] = {"KHZ_48", "KHZ_96",
 static char const *mi2s_tx_sample_rate_text[] = {"KHZ_48", "KHZ_96",
 					"KHZ_192", "KHZ_8",
 					"KHZ_16", "KHZ_32"};
+#ifdef CONFIG_MACH_T86519A1
+static const char *const quatmi2s_clk_text[] = {"DISABLE", "ENABLE"};
+#endif
 
 static int msm_auxpcm_be_params_fixup(struct snd_soc_pcm_runtime *rtd,
 					struct snd_pcm_hw_params *params)
@@ -670,17 +673,6 @@ static int loopback_mclk_put(struct snd_kcontrol *kcontrol,
 	case 1:
 		ret = pinctrl_select_state(pinctrl_info.pinctrl,
 				pinctrl_info.cdc_lines_act);
-#ifdef CONFIG_MACH_CP8675
-		if (ret < 0) {
-			pr_err("%s: failed to enable codec GPIO: %d\n",
-					__func__, ret);
-			break;
-		}
-#endif
-		pdata->digital_cdc_clk.clk_val = 9600000;
-		ret = afe_set_digital_codec_core_clock(
-				AFE_PORT_ID_PRIMARY_MI2S_RX,
-				&pdata->digital_cdc_clk);
 		if (ret < 0) {
 			pr_err("%s: failed to configure the gpio; ret=%d\n",
 					__func__, ret);
@@ -1397,6 +1389,10 @@ static const struct soc_enum msm_snd_enum[] = {
 	SOC_ENUM_SINGLE_EXT(2, loopback_mclk_text),
 	SOC_ENUM_SINGLE_EXT(6, pri_rx_sample_rate_text),
 	SOC_ENUM_SINGLE_EXT(6, mi2s_tx_sample_rate_text),
+	SOC_ENUM_SINGLE_EXT(2, mi2s_rx_sample_rate_text),
+#ifdef CONFIG_MACH_T86519A1
+	SOC_ENUM_SINGLE_EXT(2, quatmi2s_clk_text),
+#endif
 };
 
 static const char *const btsco_rate_text[] = {"BTSCO_RATE_8KHZ",
@@ -1420,6 +1416,8 @@ static const struct snd_kcontrol_new msm_snd_controls[] = {
 			pri_rx_sample_rate_get, pri_rx_sample_rate_put),
 	SOC_ENUM_EXT("MI2S TX SampleRate", msm_snd_enum[4],
 			mi2s_tx_sample_rate_get, mi2s_tx_sample_rate_put),
+	SOC_ENUM_EXT("MI2S_RX SampleRate", msm_snd_enum[3],
+			mi2s_rx_sample_rate_get, mi2s_rx_sample_rate_put),
 };
 
 static int msm8x16_mclk_event(struct snd_soc_dapm_widget *w,
@@ -1446,6 +1444,10 @@ static int msm8x16_mclk_event(struct snd_soc_dapm_widget *w,
 	case SND_SOC_DAPM_PRE_PMU:
 		if (pdata->codec_type)
 			msm8x16_enable_extcodec_ext_clk(w->codec, 1, true);
+#ifdef CONFIG_MACH_CP8675
+		if (atomic_read(&pdata->mclk_rsc_ref) < 1)
+			msm8x16_enable_codec_ext_clk(w->codec, 1, true);
+#endif
 		break;
 	case SND_SOC_DAPM_POST_PMD:
 		pr_debug("%s: mclk_res_ref = %d\n",
@@ -2905,6 +2907,36 @@ static struct snd_soc_dai_link msm8x16_dai[] = {
 		.codec_dai_name = "snd-soc-dummy-dai",
 		.codec_name = "snd-soc-dummy",
 		.be_id = MSM_FRONTEND_DAI_QCHAT,
+	},
+	{/* hw:x,27 */
+		.name = "VoiceMMode1",
+		.stream_name = "VoiceMMode1",
+		.cpu_dai_name   = "VoiceMMode1",
+		.platform_name  = "msm-pcm-voice",
+		.dynamic = 1,
+		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
+			SND_SOC_DPCM_TRIGGER_POST},
+		.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		.codec_dai_name = "snd-soc-dummy-dai",
+		.codec_name = "snd-soc-dummy",
+		.be_id = MSM_FRONTEND_DAI_VOICEMMODE1,
+	},
+	{/* hw:x,28 */
+		.name = "VoiceMMode2",
+		.stream_name = "VoiceMMode2",
+		.cpu_dai_name   = "VoiceMMode2",
+		.platform_name  = "msm-pcm-voice",
+		.dynamic = 1,
+		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
+			SND_SOC_DPCM_TRIGGER_POST},
+		.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		.codec_dai_name = "snd-soc-dummy-dai",
+		.codec_name = "snd-soc-dummy",
+		.be_id = MSM_FRONTEND_DAI_VOICEMMODE2,
 	},
 	/* Primary AUX PCM Backend DAI Links */
 	{
